@@ -1,0 +1,18 @@
+app_port = 8089
+
+[mysql]
+
+datasource = "dbuser:dbpass@tcp(127.0.0.1:3306)/testdb?parseTime=true&time_zone=%27%2B00:00%27"
+max_connection = 2000
+
+[logs]
+
+disable_default_writer = false
+stdout_only = true
+print_log = true
+common_log = "/data/log/my-gin-example/common.log"
+
+[default]
+
+country_iso = "tw"
+time_zone = "+08:00"
