@@ -1,0 +1,26 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.11.5
+    environment:
+      GO111MODULE: "ON"
+    working_directory: /go/src/github.com/wmh/my-gin-example
+    steps:
+      - checkout
+      - run:
+          name: run build
+          command: |
+            go build -v
+      - run:
+          name: run tests
+          command: |
+            go fmt ./...
+            go vet ./...
+            go test -v -race ./...
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build
