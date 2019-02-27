@@ -5,7 +5,6 @@ jobs:
       - image: circleci/golang:1.11.5
     environment:
       GO111MODULE: "ON"
-    working_directory: /go/src/github.com/wmh/my-gin-example
     steps:
       - checkout
       - run:
