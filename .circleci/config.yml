@@ -84,7 +84,5 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-      - build-go1.10
-      - build-go1.11.5
       - build-go1.11.5-gomodules
       - build-go1.16
