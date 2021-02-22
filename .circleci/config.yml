@@ -53,6 +53,21 @@ jobs:
             go vet ./...
             go test -v -race ./...
 
+  build-go1.16:
+    docker:
+      - image: circleci/golang:1.16
+    steps:
+      - checkout
+      - run:
+          name: run build
+          command: go build -v
+      - run:
+          name: run tests
+          command: |
+            go fmt ./...
+            go vet ./...
+            go test -v -race ./...
+
 workflows:
   version: 2
   build-deploy:
@@ -60,3 +75,4 @@ workflows:
       - build-go1.10
       - build-go1.11.5
       - build-go1.11.5-gomodules
+      - build-go1.16
