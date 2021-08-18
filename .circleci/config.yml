@@ -1,66 +1,66 @@
 version: 2
 jobs:
-  build-go1.10:
-    docker:
-      - image: circleci/golang:1.10
-    working_directory: /go/src/github.com/wmh/my-gin-example
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "c7:f9:da:fa:75:f0:cb:2e:bc:84:c6:5c:71:6b:ed:57"
-      - checkout
-      - run:
-          name: go get
-          command: go get -v -t -d ./...
-      - run:
-          name: run build
-          command: go build -v
-      - run:
-          name: run tests
-          command: |
-            go fmt ./...
-            go vet ./...
-            go test -v -race ./...
+  # build-go1.10:
+  #   docker:
+  #     - image: circleci/golang:1.10
+  #   working_directory: /go/src/github.com/wmh/my-gin-example
+  #   steps:
+  #     - add_ssh_keys:
+  #         fingerprints:
+  #           - "c7:f9:da:fa:75:f0:cb:2e:bc:84:c6:5c:71:6b:ed:57"
+  #     - checkout
+  #     - run:
+  #         name: go get
+  #         command: go get -v -t -d ./...
+  #     - run:
+  #         name: run build
+  #         command: go build -v
+  #     - run:
+  #         name: run tests
+  #         command: |
+  #           go fmt ./...
+  #           go vet ./...
+  #           go test -v -race ./...
 
-  build-go1.11.5:
-    docker:
-      - image: circleci/golang:1.11.5
-    working_directory: /go/src/github.com/wmh/my-gin-example
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "c7:f9:da:fa:75:f0:cb:2e:bc:84:c6:5c:71:6b:ed:57"
-      - checkout
-      - run:
-          name: go get
-          command: go get -v -t -d ./...
-      - run:
-          name: run build
-          command: go build -v
-      - run:
-          name: run tests
-          command: |
-            go fmt ./...
-            go vet ./...
-            go test -v -race ./...
+  # build-go1.11.5:
+  #   docker:
+  #     - image: circleci/golang:1.11.5
+  #   working_directory: /go/src/github.com/wmh/my-gin-example
+  #   steps:
+  #     - add_ssh_keys:
+  #         fingerprints:
+  #           - "c7:f9:da:fa:75:f0:cb:2e:bc:84:c6:5c:71:6b:ed:57"
+  #     - checkout
+  #     - run:
+  #         name: go get
+  #         command: go get -v -t -d ./...
+  #     - run:
+  #         name: run build
+  #         command: go build -v
+  #     - run:
+  #         name: run tests
+  #         command: |
+  #           go fmt ./...
+  #           go vet ./...
+  #           go test -v -race ./...
 
-  build-go1.11.5-gomodules:
-    docker:
-      - image: circleci/golang:1.11.5
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "c7:f9:da:fa:75:f0:cb:2e:bc:84:c6:5c:71:6b:ed:57"
-      - checkout
-      - run:
-          name: run build
-          command: go build -v
-      - run:
-          name: run tests
-          command: |
-            go fmt ./...
-            go vet ./...
-            go test -v -race ./...
+  # build-go1.11.5-gomodules:
+  #   docker:
+  #     - image: circleci/golang:1.11.5
+  #   steps:
+  #     - add_ssh_keys:
+  #         fingerprints:
+  #           - "c7:f9:da:fa:75:f0:cb:2e:bc:84:c6:5c:71:6b:ed:57"
+  #     - checkout
+  #     - run:
+  #         name: run build
+  #         command: go build -v
+  #     - run:
+  #         name: run tests
+  #         command: |
+  #           go fmt ./...
+  #           go vet ./...
+  #           go test -v -race ./...
 
   build-go1.16:
     docker:
