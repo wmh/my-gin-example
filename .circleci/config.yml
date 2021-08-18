@@ -80,6 +80,24 @@ jobs:
             go vet ./...
             go test -v -race ./...
 
+  build-go1.17:
+    docker:
+      - image: circleci/golang:1.17
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "c7:f9:da:fa:75:f0:cb:2e:bc:84:c6:5c:71:6b:ed:57"
+      - checkout
+      - run:
+          name: run build
+          command: go build -v
+      - run:
+          name: run tests
+          command: |
+            go fmt ./...
+            go vet ./...
+            go test -v -race ./...
+
 workflows:
   version: 2
   build-deploy:
