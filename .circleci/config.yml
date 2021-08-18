@@ -64,7 +64,7 @@ jobs:
 
   build-go1.16:
     docker:
-      - image: circleci/golang:1.16
+      - image: cimg/go:1.16
     steps:
       - add_ssh_keys:
           fingerprints:
@@ -82,7 +82,7 @@ jobs:
 
   build-go1.17:
     docker:
-      - image: circleci/golang:1.17
+      - image: cimg/go:1.17
     steps:
       - add_ssh_keys:
           fingerprints:
