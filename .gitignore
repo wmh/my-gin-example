@@ -16,3 +16,4 @@ my-gin-example
 
 # fresh
 tmp/
+data/*.db

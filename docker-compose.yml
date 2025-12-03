@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./data:/root/data
+      - ./config:/root/config
+    environment:
+      - GIN_MODE=release
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8089/ok"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -34,7 +34,7 @@ func AuthHello(c *gin.Context) {
 	uri := c.Request.RequestURI
 	var body []byte
 	if c.Request.Body != nil {
-		body, _ = ioutil.ReadAll(c.Request.Body)
+		body, _ = io.ReadAll(c.Request.Body)
 	}
 
 	msg := core.H{"ts": time.Now().Unix(), "path": uri}
