@@ -17,7 +17,7 @@ A comprehensive example of a RESTful API built with Gin framework, featuring mod
 
 ## Build Status
 
-[![CircleCI](https://circleci.com/gh/wmh/my-gin-example/tree/master.svg?style=svg)](https://circleci.com/gh/wmh/my-gin-example/tree/master)
+[![Go Build and Test](https://github.com/wmh/my-gin-example/actions/workflows/go.yml/badge.svg)](https://github.com/wmh/my-gin-example/actions/workflows/go.yml)
 
 ## Prerequisites
 
