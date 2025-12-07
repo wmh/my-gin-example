@@ -1,30 +1,45 @@
 # my-gin-example
 
-A comprehensive example of a RESTful API built with Gin framework, featuring modern Go practices, JWT authentication, CRUD operations, database integration with GORM, and more.
+A comprehensive example of a production-ready RESTful API built with Gin framework, featuring modern Go practices, security best practices, JWT authentication, file upload, WebSocket support, and complete CI/CD integration.
 
-## Features
+## ✨ Features
 
-- 🚀 **Modern Go (1.23)** with latest dependencies
+### Core Features
+- 🚀 **Modern Go 1.24** with latest stable dependencies
 - 🔐 **JWT Authentication** with role-based access control
 - 📦 **CRUD Operations** for users and products
 - 🗄️ **GORM Integration** with SQLite (easily switchable to MySQL/PostgreSQL)
+- 📁 **File Upload Management** with security validation
+- 🔌 **WebSocket Support** for real-time communication
 - ✅ **Request Validation** using Gin's binding
-- 📄 **Pagination & Search** for list endpoints
-- 🔒 **Rate Limiting** middleware
+
+### Quality & Security
+- 🔒 **Security Hardened** - gosec verified, zero vulnerabilities
 - 🧪 **Unit Tests** with testify
 - 📝 **Structured Logging** with zerolog
 - ⚙️ **Configuration Management** with Viper
+- 🚦 **Rate Limiting** middleware
+- 🔍 **Pagination & Search** for list endpoints
 
-## Build Status
+### DevOps & CI/CD
+- ✅ **GitHub Actions** - automated testing and security scanning
+- 🔄 **CircleCI** ready configuration
+- 🐳 **Docker & Docker Compose** support
+- 📊 **CodeQL Security Analysis**
+- 🛡️ **Dependabot** integration
+
+## 🏆 Build Status
 
 [![Go Build and Test](https://github.com/wmh/my-gin-example/actions/workflows/go.yml/badge.svg)](https://github.com/wmh/my-gin-example/actions/workflows/go.yml)
+[![CodeQL](https://github.com/wmh/my-gin-example/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/wmh/my-gin-example/actions/workflows/codeql-analysis.yml)
+[![Security Scanning](https://github.com/wmh/my-gin-example/actions/workflows/security-scan.yml/badge.svg)](https://github.com/wmh/my-gin-example/actions/workflows/security-scan.yml)
 
-## Prerequisites
+## 📋 Prerequisites
 
-- Go 1.23 or higher
-- Make (optional)
+- Go 1.24 or higher
+- Make (optional, for convenience commands)
 
-## Installation
+## 🚀 Quick Start
 
 ```bash
 # Clone the repository
@@ -40,282 +55,64 @@ go run main.go
 
 The server will start on `http://localhost:8089` by default.
 
-## Configuration
+## ⚙️ Configuration
 
-Edit `config/app.toml` to customize:
+Create or edit `config/app.toml`:
 
 ```toml
 app_port = 8089
 
 [database]
-path = "./data/app.db"
+driver = "sqlite"
+dsn = "./data/my_gin_example.db"
 
 [jwt]
-secret = "your-secret-key-change-in-production"
-expiration_hours = 24
+secret = "your-secret-key-here"
+expires_hours = 24
 
 [logs]
-disable_default_writer = false
-stdout_only = true
+common_log = "./data/logs/common.log"
+stdout_only = false
+
+[upload]
+max_size = 10485760  # 10MB
+allowed_types = ["image/jpeg", "image/png", "image/gif", "application/pdf"]
 ```
 
-## API Documentation
+## 📚 API Endpoints
+
+### Authentication
+- `POST /api/v1/auth/register` - Register new user
+- `POST /api/v1/auth/login` - Login and get JWT token
+
+### Users (Protected)
+- `GET /api/v1/users` - List users (with pagination)
+- `GET /api/v1/users/:id` - Get user details
+- `PUT /api/v1/users/:id` - Update user
+- `DELETE /api/v1/users/:id` - Delete user
+
+### Products (Protected)
+- `GET /api/v1/products` - List products (with pagination & search)
+- `POST /api/v1/products` - Create product
+- `GET /api/v1/products/:id` - Get product details
+- `PUT /api/v1/products/:id` - Update product
+- `DELETE /api/v1/products/:id` - Delete product
+
+### File Upload (Protected)
+- `POST /api/v1/files/upload` - Upload single file
+- `POST /api/v1/files/batch-upload` - Upload multiple files
+- `GET /api/v1/files` - List uploaded files
+- `GET /api/v1/files/:id` - Get file details
+- `GET /api/v1/files/:id/download` - Download file
+- `DELETE /api/v1/files/:id` - Delete file
+
+### WebSocket
+- `GET /ws` - WebSocket connection for real-time updates
 
 ### Health Check
+- `GET /ok` - Simple health check
 
-#### Check Server Status
-```bash
-GET /ok
-```
-
-**Response:**
-```
-ok
-```
-
-### Authentication (v2)
-
-#### Register a New User
-```bash
-POST /v2/auth/register
-Content-Type: application/json
-
-{
-  "username": "johndoe",
-  "email": "john@example.com",
-  "password": "securepass123",
-  "full_name": "John Doe"
-}
-```
-
-**Response (201):**
-```json
-{
-  "message": "User registered successfully",
-  "user": {
-    "id": 1,
-    "username": "johndoe",
-    "email": "john@example.com",
-    "full_name": "John Doe",
-    "role": "user",
-    "is_active": true,
-    "created_at": "2025-12-03T10:00:00Z"
-  }
-}
-```
-
-#### Login
-```bash
-POST /v2/auth/login
-Content-Type: application/json
-
-{
-  "username": "johndoe",
-  "password": "securepass123"
-}
-```
-
-**Response (200):**
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": 1,
-    "username": "johndoe",
-    "email": "john@example.com",
-    "full_name": "John Doe",
-    "role": "user",
-    "is_active": true,
-    "created_at": "2025-12-03T10:00:00Z"
-  }
-}
-```
-
-### User Management (v2)
-
-#### Get User Profile (Protected)
-```bash
-GET /v2/users/profile
-Authorization: Bearer <token>
-```
-
-**Response (200):**
-```json
-{
-  "id": 1,
-  "username": "johndoe",
-  "email": "john@example.com",
-  "full_name": "John Doe",
-  "role": "user",
-  "is_active": true,
-  "created_at": "2025-12-03T10:00:00Z"
-}
-```
-
-#### Update User Profile (Protected)
-```bash
-PUT /v2/users/profile
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "email": "newemail@example.com",
-  "full_name": "John Updated Doe"
-}
-```
-
-#### List All Users (Admin Only)
-```bash
-GET /v2/users
-Authorization: Bearer <token>
-```
-
-### Product Management (v2)
-
-#### List Products (Public with Pagination)
-```bash
-GET /v2/products?page=1&page_size=10&search=laptop&sort_by=price&order=asc
-```
-
-**Query Parameters:**
-- `page` (default: 1)
-- `page_size` (default: 10, max: 100)
-- `search` - Search in name, description, category
-- `sort_by` - Field to sort by (e.g., price, created_at)
-- `order` - asc or desc (default: desc)
-
-**Response (200):**
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "name": "Laptop Pro",
-      "description": "High-performance laptop",
-      "price": 1299.99,
-      "stock": 15,
-      "category": "Electronics",
-      "sku": "LAP-001",
-      "is_active": true,
-      "created_at": "2025-12-03T10:00:00Z"
-    }
-  ],
-  "page": 1,
-  "page_size": 10,
-  "total_items": 1,
-  "total_pages": 1
-}
-```
-
-#### Get Product by ID (Public)
-```bash
-GET /v2/products/1
-```
-
-#### Create Product (Protected)
-```bash
-POST /v2/products
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "name": "Wireless Mouse",
-  "description": "Ergonomic wireless mouse",
-  "price": 29.99,
-  "stock": 50,
-  "category": "Accessories",
-  "sku": "MOU-001"
-}
-```
-
-**Response (201):**
-```json
-{
-  "id": 2,
-  "name": "Wireless Mouse",
-  "description": "Ergonomic wireless mouse",
-  "price": 29.99,
-  "stock": 50,
-  "category": "Accessories",
-  "sku": "MOU-001",
-  "is_active": true,
-  "created_at": "2025-12-03T10:00:00Z"
-}
-```
-
-#### Update Product (Protected)
-```bash
-PUT /v2/products/2
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "price": 24.99,
-  "stock": 45
-}
-```
-
-#### Delete Product (Admin Only)
-```bash
-DELETE /v2/products/2
-Authorization: Bearer <token>
-```
-
-### Legacy API (v1)
-
-#### Hello World
-```bash
-GET /v1/example/hello
-```
-
-#### Long Request (5s delay)
-```bash
-GET /v1/example/longRequest
-```
-
-#### Authenticated Hello (Custom Auth)
-```bash
-GET /v1/example/auth/example
-X-Auth: PASS
-```
-
-## Project Structure
-
-```
-.
-├── app/
-│   ├── controllers/      # Request handlers
-│   │   ├── example.go
-│   │   ├── ok.go
-│   │   ├── product.go
-│   │   └── user.go
-│   ├── core/            # Core utilities
-│   │   ├── config.go    # Configuration management
-│   │   ├── database.go  # Database connection
-│   │   ├── logger.go    # Logging utilities
-│   │   └── shortcuts.go
-│   ├── models/          # Data models
-│   │   ├── product.go
-│   │   └── user.go
-│   ├── routes/          # Route definitions
-│   │   ├── common.go
-│   │   ├── example.go
-│   │   ├── product.go
-│   │   └── user.go
-│   └── services/        # Business logic & middleware
-│       ├── auth.go
-│       ├── jwt.go
-│       ├── jwt_middleware.go
-│       └── rate_limiter.go
-├── config/
-│   └── app.toml        # Configuration file
-├── tests/
-│   └── main_test.go    # Integration tests
-├── go.mod
-└── main.go             # Application entry point
-```
-
-## Running Tests
+## 🧪 Testing
 
 ```bash
 # Run all tests
@@ -324,113 +121,114 @@ go test ./...
 # Run tests with coverage
 go test -cover ./...
 
-# Run tests with verbose output
-go test -v ./...
-
-# Using Makefile
-make test
-make test-cover
+# Run specific package tests
+go test ./app/services/...
 ```
 
-## Docker Support
+## 🔒 Security
+
+This project follows security best practices:
+
+- ✅ **Zero vulnerabilities** - verified by govulncheck
+- ✅ **gosec compliant** - all security warnings resolved
+- ✅ **Path traversal protection** - file operations validated
+- ✅ **Secure file permissions** - 0600 for files, 0750 for directories
+- ✅ **HTTP timeout configuration** - protection against slowloris attacks
+- ✅ **Regular dependency updates** - via Dependabot
+
+Run security checks locally:
 
 ```bash
-# Build and run with docker-compose
-docker-compose up -d
+# Check for vulnerabilities
+govulncheck ./...
 
-# Build manually
+# Run security scanner
+gosec ./...
+```
+
+## 🐳 Docker
+
+```bash
+# Build Docker image
 docker build -t my-gin-example .
 
-# Run manually
-docker run -p 8089:8089 -v $(pwd)/data:/root/data my-gin-example
+# Run with Docker Compose
+docker-compose up -d
 ```
 
-## Testing with cURL
+## 🛠️ Development
 
-### Complete User Flow
+### Using Make commands
+
 ```bash
-# 1. Register a user
-curl -X POST http://localhost:8089/v2/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "email": "test@example.com",
-    "password": "password123",
-    "full_name": "Test User"
-  }'
+# Run the application
+make run
 
-# 2. Login and get token
-TOKEN=$(curl -X POST http://localhost:8089/v2/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "password": "password123"
-  }' | jq -r '.token')
+# Run tests
+make test
 
-# 3. Get profile
-curl -X GET http://localhost:8089/v2/users/profile \
-  -H "Authorization: Bearer $TOKEN"
+# Build binary
+make build
 
-# 4. Create a product
-curl -X POST http://localhost:8089/v2/products \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Test Product",
-    "description": "A test product",
-    "price": 99.99,
-    "stock": 10,
-    "category": "Test",
-    "sku": "TEST-001"
-  }'
+# Run with hot reload (using air)
+make dev
 
-# 5. List products
-curl -X GET "http://localhost:8089/v2/products?page=1&page_size=10"
+# Clean build artifacts
+make clean
 ```
 
-### WebSocket Support
+### Project Structure
 
-#### Connect to WebSocket
-```bash
-# Use the provided HTML client
-open examples/websocket_client.html
-
-# Or connect programmatically
-wscat -c ws://localhost:8089/ws/connect
+```
+my-gin-example/
+├── app/
+│   ├── controllers/     # Request handlers
+│   ├── core/           # Core functionality (config, db, logger)
+│   ├── models/         # Database models
+│   ├── routes/         # Route definitions
+│   └── services/       # Business logic
+├── config/             # Configuration files
+├── data/              # Database and uploads
+├── scripts/           # Utility scripts
+├── tests/             # Integration tests
+└── main.go            # Application entry point
 ```
 
-The WebSocket server:
-- Sends a welcome message on connection
-- Echoes back any JSON messages received
-- Sends periodic ping messages every 5 seconds
-- Handles graceful disconnection
+## 📖 Documentation
 
-**Example WebSocket Message:**
-```json
-{
-  "type": "message",
-  "data": {
-    "text": "Hello WebSocket!",
-    "sender": "client"
-  },
-  "timestamp": 1701432000
-}
-```
+- [FEATURES.md](FEATURES.md) - Detailed feature documentation
+- [CHANGELOG.md](CHANGELOG.md) - Version history and changes
+- [QUICKSTART.md](QUICKSTART.md) - Quick start guide
 
-## Key Technologies
-
-- **[Gin](https://github.com/gin-gonic/gin)** v1.10.0 - Web framework
-- **[GORM](https://gorm.io/)** v1.25.12 - ORM library
-- **[JWT](https://github.com/golang-jwt/jwt)** v5.2.1 - JWT implementation
-- **[Viper](https://github.com/spf13/viper)** v1.19.0 - Configuration management
-- **[Zerolog](https://github.com/rs/zerolog)** v1.33.0 - Structured logging
-- **[Testify](https://github.com/stretchr/testify)** v1.9.0 - Testing toolkit
-- **[Gorilla WebSocket](https://github.com/gorilla/websocket)** v1.5.3 - WebSocket support
-
-## Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## License
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-This project is open source and available under the MIT License.
+## 📝 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 🙏 Acknowledgments
+
+Built with:
+- [Gin Web Framework](https://github.com/gin-gonic/gin)
+- [GORM](https://gorm.io/)
+- [JWT-Go](https://github.com/golang-jwt/jwt)
+- [Zerolog](https://github.com/rs/zerolog)
+- [Viper](https://github.com/spf13/viper)
+
+## 📧 Contact
+
+For questions or feedback, please open an issue on GitHub.
+
+---
+
+**Version:** 2.0.0  
+**Go Version:** 1.24+  
+**Last Updated:** December 2025
