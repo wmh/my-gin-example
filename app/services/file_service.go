@@ -50,7 +50,7 @@ func NewFileService() *FileService {
 
 func (fs *FileService) InitUploadDir() error {
 	if _, err := os.Stat(fs.uploadDir); os.IsNotExist(err) {
-		return os.MkdirAll(fs.uploadDir, 0755)
+		return os.MkdirAll(fs.uploadDir, 0750)
 	}
 	return nil
 }
@@ -130,6 +130,19 @@ func (fs *FileService) SaveFile(file *multipart.FileHeader) (string, string, err
 
 	fileName := fs.GenerateUniqueFileName(file.Filename)
 	filePath := filepath.Join(fs.uploadDir, fileName)
+	
+	// Validate the file path is within uploadDir (防止路徑遍歷)
+	absUploadDir, err := filepath.Abs(fs.uploadDir)
+	if err != nil {
+		return "", "", err
+	}
+	absFilePath, err := filepath.Abs(filePath)
+	if err != nil {
+		return "", "", err
+	}
+	if !strings.HasPrefix(absFilePath, absUploadDir) {
+		return "", "", fmt.Errorf("invalid file path")
+	}
 
 	src, err := file.Open()
 	if err != nil {
@@ -137,7 +150,8 @@ func (fs *FileService) SaveFile(file *multipart.FileHeader) (string, string, err
 	}
 	defer src.Close()
 
-	dst, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	// #nosec G304 -- filePath is validated above to be within uploadDir
+	dst, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return "", "", err
 	}

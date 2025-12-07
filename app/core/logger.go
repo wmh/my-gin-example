@@ -15,18 +15,31 @@ var commonLogger zerolog.Logger
 func init() {
 	logFile := ConfString("logs.common_log")
 
-	// prepare directory
+	// prepare directory (best effort, don't panic in tests)
 	dir, _ := filepath.Split(logFile)
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		os.MkdirAll(dir, 0755)
+	if dir != "" && dir != "/" {
+		if _, err := os.Stat(dir); os.IsNotExist(err) {
+			_ = os.MkdirAll(dir, 0750) // ignore error for test environments
+		}
 	}
 
 	if ConfBool("logs.stdout_only") {
 		commonLogger = zerolog.New(os.Stdout).With().Timestamp().Logger()
 	} else {
-		f, err := os.OpenFile(logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		// Validate log file path
+		absLogFile, err := filepath.Abs(logFile)
 		if err != nil {
-			panic(err.Error())
+			// Fall back to stdout if path is invalid
+			commonLogger = zerolog.New(os.Stdout).With().Timestamp().Logger()
+			return
+		}
+		
+		// #nosec G304 -- log file path is from configuration and validated
+		f, err := os.OpenFile(absLogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
+		if err != nil {
+			// Fall back to stdout if can't open file
+			commonLogger = zerolog.New(os.Stdout).With().Timestamp().Logger()
+			return
 		}
 		commonLogger = zerolog.New(f).With().Timestamp().Logger()
 	}

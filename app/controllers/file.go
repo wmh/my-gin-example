@@ -63,7 +63,9 @@ func UploadFile(c *gin.Context) {
 	if err := core.DB.Create(&fileUpload).Error; err != nil {
 		// Log orphaned file for cleanup
 		core.ErrorLog("upload_file", fmt.Sprintf("DB error: %s; orphaned file at %s needs cleanup", err.Error(), filePath))
-		fileService.DeleteFile(filePath)
+		if deleteErr := fileService.DeleteFile(filePath); deleteErr != nil {
+			core.ErrorLog("upload_file", fmt.Sprintf("Failed to delete orphaned file: %v", deleteErr))
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file record"})
 		return
 	}
@@ -157,7 +159,9 @@ func UploadMultipleFiles(c *gin.Context) {
 		}
 
 		if err := core.DB.Create(&fileUpload).Error; err != nil {
-			fileService.DeleteFile(filePath)
+			if deleteErr := fileService.DeleteFile(filePath); deleteErr != nil {
+				core.ErrorLog("batch_upload", fmt.Sprintf("Failed to delete orphaned file: %v", deleteErr))
+			}
 			result.Success = false
 			result.Error = "Failed to save record"
 			results = append(results, result)

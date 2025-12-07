@@ -46,8 +46,12 @@ func main() {
 
 	appPort := core.ConfString("APP_PORT")
 	srv := &http.Server{
-		Addr:    ":" + appPort,
-		Handler: r,
+		Addr:              ":" + appPort,
+		Handler:           r,
+		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		IdleTimeout:       60 * time.Second,
 	}
 
 	go func() {
