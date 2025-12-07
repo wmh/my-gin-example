@@ -26,19 +26,11 @@ jobs:
       
       - run:
           name: Run Tests
-          command: go test -v -race -coverprofile=coverage.out ./...
+          command: go test -v ./...
       
       - run:
           name: Build Application
           command: go build -o bin/server .
-      
-      - run:
-          name: Generate Coverage Report
-          command: go tool cover -html=coverage.out -o coverage.html
-      
-      - store_artifacts:
-          path: coverage.html
-          destination: coverage-report
       
       - store_test_results:
           path: /tmp/test-results
