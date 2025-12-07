@@ -27,7 +27,7 @@ func main() {
 	}
 	defer core.CloseDB()
 
-	if err := core.DB.AutoMigrate(&models.User{}, &models.Product{}); err != nil {
+	if err := core.DB.AutoMigrate(&models.User{}, &models.Product{}, &models.FileUpload{}); err != nil {
 		core.ErrorLog("main", "Failed to migrate database: "+err.Error())
 		os.Exit(1)
 	}
@@ -41,6 +41,7 @@ func main() {
 	routes.MakeExampleAPI(r)
 	routes.MakeUserAPI(r)
 	routes.MakeProductAPI(r)
+	routes.MakeFileAPI(r)
 	routes.MakeWebSocketAPI(r)
 
 	appPort := core.ConfString("APP_PORT")
