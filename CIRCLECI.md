@@ -14,26 +14,36 @@ Projects → 找到 my-gin-example → Set Up Project → Use Existing Config �
 
 **錯誤**: `git@github.com: Permission denied (publickey)`
 
-**解決方案**（選擇一種）：
+**解決方案**：
 
-#### 方法 A: Deploy Key（推薦）
+#### Deploy Key（推薦，自動同步）
+
+CircleCI 的 Deploy Key 會自動同步到 GitHub，無需手動複製貼上。
+
+**步驟**：
 
 1. 訪問 https://app.circleci.com/settings/project/github/wmh/my-gin-example/ssh
-2. 複製 "Deploy Key" 區域的公鑰（完整的 `ssh-ed25519 AAAA...`）
-3. 訪問 https://github.com/wmh/my-gin-example/settings/keys
-4. 點擊 "Add deploy key"
-   - Title: `CircleCI`
-   - Key: 粘貼公鑰
-   - 不勾選 "Allow write access"
+
+2. 刪除舊的 Deploy Key（如果有）：
+   - 點擊 "Delete Deploy Key"
+
+3. 添加新的 Deploy Key：
+   - 點擊 "Add Deploy Key"
+   - 系統會自動生成並同步到 GitHub
+
+4. 驗證 GitHub：
+   - 訪問 https://github.com/wmh/my-gin-example/settings/keys
+   - 應該會自動看到新的 Deploy Key
+
 5. 重新運行 Pipeline
 
-#### 方法 B: User Key（快速）
+**注意**：Deploy Key 由 CircleCI 自動管理，會自動出現在 GitHub 倉庫設置中。
+
+#### User Key（備選，快速）
 
 1. 訪問 https://app.circleci.com/settings/project/github/wmh/my-gin-example/ssh
 2. 點擊 "Add User Key" → 授權 GitHub
 3. 重新運行 Pipeline
-
-**推薦使用 Deploy Key**（更安全，只能訪問單個倉庫）
 
 ### 3. 驗證
 
@@ -70,7 +80,13 @@ A: 按照上面的方法 A 或 B 添加 SSH key
 A: 本地運行 `go test ./...` 檢查
 
 **Q: Deploy Key vs User Key?**
-A: Deploy Key 更安全（僅限單倉庫），User Key 更快（訪問所有倉庫）
+A: Deploy Key 更安全（僅限單倉庫，自動同步到 GitHub），User Key 更快（訪問所有倉庫）
+
+**Q: Deploy Key 會自動出現在 GitHub?**
+A: 是的，CircleCI 添加 Deploy Key 後會自動同步到 GitHub 倉庫的 Deploy keys 列表
+
+**Q: 如何重新生成 Deploy Key?**
+A: 在 CircleCI SSH Keys 頁面刪除舊的，點擊 "Add Deploy Key"，新的會自動同步到 GitHub
 
 ## 連結
 
