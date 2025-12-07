@@ -8,6 +8,10 @@ This directory contains example scripts and files demonstrating how to use the A
 
 This script demonstrates all the API endpoints in sequence.
 
+### File Upload Example (file_upload_example.sh)
+
+This script demonstrates the file upload and management functionality.
+
 **Requirements:**
 - Server running on `http://localhost:8089`
 - `curl` installed
@@ -20,10 +24,14 @@ go run main.go
 
 # In another terminal, run the examples
 ./examples/api_examples.sh
+
+# Or run the file upload examples
+./examples/file_upload_example.sh
 ```
 
-## What the Script Demonstrates
+## What the Scripts Demonstrate
 
+### api_examples.sh
 1. **Health Check** - Basic connectivity test
 2. **User Registration** - Create a new user account
 3. **User Login** - Authenticate and get JWT token
@@ -36,6 +44,14 @@ go run main.go
 10. **Update Product** - Modify product information
 11. **Legacy API** - Examples using v1 endpoints
 12. **Rate Limiting** - Test rate limiter behavior
+
+### file_upload_example.sh
+1. **Single File Upload** - Upload a file with metadata
+2. **Multiple Files Upload** - Upload multiple files at once
+3. **List Files** - Browse uploaded files with pagination
+4. **Get File Info** - Retrieve file metadata
+5. **Download File** - Download uploaded file
+6. **Delete File** - Remove uploaded file
 
 ## Manual Testing Examples
 

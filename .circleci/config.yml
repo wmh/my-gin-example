@@ -1,0 +1,82 @@
+version: 2.1
+
+orbs:
+  go: circleci/go@1.9.0
+
+jobs:
+  build-and-test:
+    docker:
+      - image: cimg/go:1.23
+    steps:
+      - checkout
+      
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
+            - go-mod-v1-
+      
+      - run:
+          name: Download Dependencies
+          command: go mod download
+      
+      - save_cache:
+          key: go-mod-v1-{{ checksum "go.sum" }}
+          paths:
+            - /go/pkg/mod
+      
+      - run:
+          name: Run Tests
+          command: go test -v ./...
+      
+      - run:
+          name: Build Application
+          command: go build -o bin/server .
+      
+      - store_test_results:
+          path: /tmp/test-results
+
+  lint:
+    docker:
+      - image: cimg/go:1.23
+    steps:
+      - checkout
+      
+      - run:
+          name: Install golangci-lint
+          command: |
+            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
+      
+      - run:
+          name: Run Linter
+          command: golangci-lint run --timeout 5m || true
+
+  security-scan:
+    docker:
+      - image: cimg/go:1.23
+    steps:
+      - checkout
+      
+      - run:
+          name: Install gosec
+          command: |
+            curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.18.2
+      
+      - run:
+          name: Run Security Scanner
+          command: gosec -fmt=json -out=gosec-report.json ./... || true
+      
+      - store_artifacts:
+          path: gosec-report.json
+          destination: security-report
+
+workflows:
+  version: 2
+  build-test-deploy:
+    jobs:
+      - build-and-test
+      - lint:
+          requires:
+            - build-and-test
+      - security-scan:
+          requires:
+            - build-and-test
