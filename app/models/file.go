@@ -6,10 +6,10 @@ type FileUpload struct {
 	ID           uint      `json:"id" gorm:"primaryKey"`
 	FileName     string    `json:"file_name" gorm:"not null"`
 	OriginalName string    `json:"original_name" gorm:"not null"`
-	FilePath     string    `json:"file_path" gorm:"not null"`
+	FilePath     string    `json:"-" gorm:"not null"`
 	FileSize     int64     `json:"file_size" gorm:"not null"`
 	MimeType     string    `json:"mime_type"`
-	UploadedBy   uint      `json:"uploaded_by"`
+	UploadedBy   uint      `json:"uploaded_by" gorm:"index"`
 	Category     string    `json:"category"`
 	Description  string    `json:"description"`
 	IsPublic     bool      `json:"is_public" gorm:"default:false"`
@@ -31,4 +31,6 @@ type FileUploadResponse struct {
 	MimeType     string    `json:"mime_type"`
 	DownloadURL  string    `json:"download_url"`
 	CreatedAt    time.Time `json:"created_at"`
+	Category     string    `json:"category,omitempty"`
+	Description  string    `json:"description,omitempty"`
 }

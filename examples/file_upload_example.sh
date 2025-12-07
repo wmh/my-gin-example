@@ -45,6 +45,11 @@ echo "$UPLOAD_RESPONSE" | jq .
 
 FILE_ID=$(echo "$UPLOAD_RESPONSE" | jq -r '.id')
 echo "Uploaded File ID: $FILE_ID"
+if [ "$FILE_ID" == "null" ] || [ -z "$FILE_ID" ]; then
+    echo "Error: File upload failed"
+    echo "$UPLOAD_RESPONSE"
+    exit 1
+fi
 echo ""
 
 echo "=== Step 3: Upload Multiple Files ==="

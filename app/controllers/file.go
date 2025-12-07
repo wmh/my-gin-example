@@ -3,7 +3,9 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/wmh/my-gin-example/app/core"
@@ -26,12 +28,11 @@ func UploadFile(c *gin.Context) {
 		return
 	}
 
-	allowedTypes := ""
-	if req.Category == "image" {
-		allowedTypes = services.AllowedImageTypes
-	} else if req.Category == "document" {
-		allowedTypes = services.AllowedDocTypes
+	allowedTypesMap := map[string]string{
+		"image":    services.AllowedImageTypes,
+		"document": services.AllowedDocTypes,
 	}
+	allowedTypes := allowedTypesMap[req.Category]
 
 	if err := fileService.ValidateFile(file, allowedTypes); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -60,8 +61,9 @@ func UploadFile(c *gin.Context) {
 	}
 
 	if err := core.DB.Create(&fileUpload).Error; err != nil {
+		// Log orphaned file for cleanup
+		core.ErrorLog("upload_file", fmt.Sprintf("DB error: %s; orphaned file at %s needs cleanup", err.Error(), filePath))
 		fileService.DeleteFile(filePath)
-		core.ErrorLog("upload_file", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file record"})
 		return
 	}
@@ -74,10 +76,19 @@ func UploadFile(c *gin.Context) {
 		MimeType:     fileUpload.MimeType,
 		DownloadURL:  fmt.Sprintf("/v2/files/%d/download", fileUpload.ID),
 		CreatedAt:    fileUpload.CreatedAt,
+		Category:     fileUpload.Category,
+		Description:  fileUpload.Description,
 	}
 
 	core.Log("upload_file", core.H{"file_id": fileUpload.ID, "user_id": userID})
 	c.JSON(http.StatusCreated, response)
+}
+
+type FileUploadResult struct {
+	Success bool                        `json:"success"`
+	File    *models.FileUploadResponse  `json:"file,omitempty"`
+	Error   string                      `json:"error,omitempty"`
+	Name    string                      `json:"name"`
 }
 
 func UploadMultipleFiles(c *gin.Context) {
@@ -98,16 +109,40 @@ func UploadMultipleFiles(c *gin.Context) {
 		return
 	}
 
+	// Check total batch size
+	var totalSize int64
+	for _, file := range files {
+		totalSize += file.Size
+	}
+	if totalSize > services.MaxBatchSize {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":      "Total batch size exceeds limit",
+			"total_size": totalSize,
+			"max_size":   services.MaxBatchSize,
+		})
+		return
+	}
+
 	userID := c.GetUint("user_id")
-	var responses []models.FileUploadResponse
+	var results []FileUploadResult
 
 	for _, file := range files {
+		result := FileUploadResult{
+			Name: file.Filename,
+		}
+		
 		if err := fileService.ValidateFile(file, ""); err != nil {
+			result.Success = false
+			result.Error = err.Error()
+			results = append(results, result)
 			continue
 		}
 
 		fileName, filePath, err := fileService.SaveFile(file)
 		if err != nil {
+			result.Success = false
+			result.Error = fmt.Sprintf("Failed to save: %s", err.Error())
+			results = append(results, result)
 			continue
 		}
 
@@ -123,10 +158,14 @@ func UploadMultipleFiles(c *gin.Context) {
 
 		if err := core.DB.Create(&fileUpload).Error; err != nil {
 			fileService.DeleteFile(filePath)
+			result.Success = false
+			result.Error = "Failed to save record"
+			results = append(results, result)
 			continue
 		}
 
-		responses = append(responses, models.FileUploadResponse{
+		result.Success = true
+		result.File = &models.FileUploadResponse{
 			ID:           fileUpload.ID,
 			FileName:     fileUpload.FileName,
 			OriginalName: fileUpload.OriginalName,
@@ -134,13 +173,23 @@ func UploadMultipleFiles(c *gin.Context) {
 			MimeType:     fileUpload.MimeType,
 			DownloadURL:  fmt.Sprintf("/v2/files/%d/download", fileUpload.ID),
 			CreatedAt:    fileUpload.CreatedAt,
-		})
+		}
+		results = append(results, result)
 	}
 
-	core.Log("upload_multiple_files", core.H{"count": len(responses), "user_id": userID})
+	successCount := 0
+	for _, r := range results {
+		if r.Success {
+			successCount++
+		}
+	}
+
+	core.Log("upload_multiple_files", core.H{"total": len(files), "success": successCount, "user_id": userID})
 	c.JSON(http.StatusCreated, gin.H{
-		"uploaded": len(responses),
-		"files":    responses,
+		"total":   len(files),
+		"success": successCount,
+		"failed":  len(files) - successCount,
+		"results": results,
 	})
 }
 
@@ -171,6 +220,8 @@ func GetFile(c *gin.Context) {
 		MimeType:     fileUpload.MimeType,
 		DownloadURL:  fmt.Sprintf("/v2/files/%d/download", fileUpload.ID),
 		CreatedAt:    fileUpload.CreatedAt,
+		Category:     fileUpload.Category,
+		Description:  fileUpload.Description,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -195,10 +246,21 @@ func DownloadFile(c *gin.Context) {
 		return
 	}
 
+	// Validate file path is within upload directory
+	cleanPath := filepath.Clean(fileUpload.FilePath)
+	uploadDir := filepath.Clean("./uploads")
+	if !strings.HasPrefix(cleanPath, uploadDir) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid file path"})
+		return
+	}
+
+	// Escape filename for Content-Disposition header
+	escapedFilename := strings.ReplaceAll(fileUpload.OriginalName, "\"", "\\\"")
+	
 	c.Header("Content-Description", "File Transfer")
-	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileUpload.OriginalName))
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", escapedFilename))
 	c.Header("Content-Type", fileUpload.MimeType)
-	c.File(fileUpload.FilePath)
+	c.File(cleanPath)
 }
 
 func ListFiles(c *gin.Context) {
@@ -243,6 +305,8 @@ func ListFiles(c *gin.Context) {
 			MimeType:     file.MimeType,
 			DownloadURL:  fmt.Sprintf("/v2/files/%d/download", file.ID),
 			CreatedAt:    file.CreatedAt,
+			Category:     file.Category,
+			Description:  file.Description,
 		})
 	}
 
