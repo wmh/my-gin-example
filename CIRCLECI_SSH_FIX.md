@@ -13,53 +13,102 @@ fatal: Could not read from remote repository.
 
 ---
 
-## ✅ 快速修復（5 分鐘）
+## ✅ 快速修復（3 分鐘）
 
-### 方法 1: 添加 User Key（推薦）⭐
+### 方法 1: 使用 Deploy Key（CircleCI 推薦）⭐⭐⭐
 
-這是最簡單快速的方法：
+這是 CircleCI 官方推薦的最佳方式：
+
+#### 什麼是 Deploy Key？
+
+Deploy Key 是**倉庫專用的 SSH 密鑰**：
+- CircleCI 已經為你生成了密鑰對
+- 公鑰需要添加到 GitHub
+- 私鑰已安全存儲在 CircleCI
+- **更安全** - 只能訪問單個倉庫
+
+#### 為什麼選擇 Deploy Key？
+
+✅ CircleCI 官方推薦
+✅ 更安全 - 限於單個倉庫
+✅ 符合最佳實踐
+✅ 適合生產環境
 
 #### 步驟：
 
-1. **打開 SSH Keys 設置頁面**
+**步驟 1: 從 CircleCI 複製公鑰**
+
+1. 訪問 SSH Keys 設置頁面：
    
    🔗 https://app.circleci.com/settings/project/github/wmh/my-gin-example/ssh
-   
-   或者：
-   - 進入你的項目
-   - 點擊右上角 "Project Settings"
-   - 左側菜單選擇 "SSH Keys"
 
-2. **添加 User Key**
-   
-   - 滾動到頁面的 "User Key" 區域
-   - 點擊綠色按鈕 **"Add User Key"**
+2. 找到 **"Deploy Key"** 區域（通常在頁面頂部）
 
-3. **授權 GitHub**
-   
-   - 會彈出 GitHub 授權視窗
-   - 點擊 **"Authorize with GitHub"**
-   - 如果需要，輸入你的 GitHub 密碼確認
-
-4. **確認添加成功**
-   
-   - 應該看到 "User key added" 的成功訊息
-   - 頁面會顯示一個 fingerprint
-
-5. **重新運行 Pipeline**
-   
-   - 返回 Pipeline 頁面
-   - 點擊 **"Rerun workflow from failed"**
-   - 或點擊 **"Rerun from start"**
-
-6. **驗證成功** ✅
-   
-   在構建日誌中應該看到：
+3. 你會看到：
    ```
-   ✓ Cloning git repository
-   ✓ Cloning into '.'...
-   ✓ Receiving objects: 100%
+   Deploy Key
+   ───────────────────────────────────────────
+   A deploy key is a repo-specific SSH key.
+   
+   Public key:
+   ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA...
    ```
+
+4. **複製完整的公鑰**：
+   - 點擊公鑰旁邊的 📋 複製按鈕
+   - 或手動選擇並複製（從 `ssh-ed25519` 到結尾）
+
+**步驟 2: 添加到 GitHub**
+
+1. 訪問 GitHub 倉庫的 Deploy keys 設置：
+   
+   🔗 https://github.com/wmh/my-gin-example/settings/keys
+
+2. 點擊綠色按鈕 **"Add deploy key"**
+
+3. 填寫表單：
+   - **Title**: `CircleCI Deploy Key`
+   - **Key**: 粘貼剛才複製的完整公鑰
+   - **Allow write access**: 
+     - ⬜ 只需要 pull（運行測試）：不勾選
+     - ✅ 需要 push（自動部署）：勾選
+
+4. 點擊 **"Add key"** 保存
+
+**步驟 3: 驗證設置**
+
+1. 返回 CircleCI Pipeline：
+   
+   🔗 https://app.circleci.com/pipelines/github/wmh/my-gin-example
+
+2. 點擊 **"Rerun workflow from failed"**
+
+3. 查看構建日誌，應該看到：
+   ```
+   ✅ Cloning git repository
+   ✅ Cloning into '.'...
+   ✅ Receiving objects: 100%
+   ```
+
+---
+
+### 方法 2: 添加 User Key（快速但不推薦）
+
+⚠️ 注意：User Key 可以訪問你的所有倉庫，安全性較低。
+
+如果你想快速測試（不推薦用於生產）：
+
+#### 步驟：
+
+1. 訪問：https://app.circleci.com/settings/project/github/wmh/my-gin-example/ssh
+
+2. 滾動到 **"User Key"** 區域
+
+3. 點擊 **"Add User Key"**
+
+4. 授權 GitHub
+
+5. 重新運行 Pipeline
 
 ---
 
@@ -281,15 +330,21 @@ CircleCI 使用 SSH 協議從 GitHub 克隆代碼。就像你在本地使用 `gi
 
 ## 📌 總結
 
-**最快的修復方法：**
+**推薦方法（Deploy Key）：**
 
-1. 訪問 https://app.circleci.com/settings/project/github/wmh/my-gin-example/ssh
-2. 點擊 "Add User Key"
-3. 授權 GitHub
-4. 重新運行 Pipeline
-5. ✅ 完成！
+1. 訪問 CircleCI：https://app.circleci.com/settings/project/github/wmh/my-gin-example/ssh
+2. 複製 Deploy Key 公鑰
+3. 訪問 GitHub：https://github.com/wmh/my-gin-example/settings/keys
+4. 添加 Deploy key
+5. 重新運行 Pipeline
+6. ✅ 完成！
 
-**預計時間：2-3 分鐘**
+**預計時間：3 分鐘**
+
+**為什麼不用 User Key？**
+- User Key 可以訪問所有倉庫（安全風險）
+- CircleCI 官方推薦使用 Deploy Key
+- Deploy Key 更符合最佳實踐
 
 ---
 
