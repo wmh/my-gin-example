@@ -10,8 +10,8 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/crypto v0.45.0
-	gorm.io/driver/sqlite v1.5.6
-	gorm.io/gorm v1.25.12
+	gorm.io/driver/sqlite v1.6.0
+	gorm.io/gorm v1.31.1
 )
 
 require (
