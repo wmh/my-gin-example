@@ -30,6 +30,32 @@ jobs:
         go install github.com/securego/gosec/v2/cmd/gosec@latest
         gosec -fmt sarif -out gosec-results.sarif -no-fail ./...
 
+    - name: Fix SARIF format
+      run: |
+        # Fix the relationships array issue in SARIF output
+        python3 << 'EOF'
+        import json
+        with open('gosec-results.sarif', 'r') as f:
+            data = json.load(f)
+        
+        # Fix relationships field - remove null/invalid entries
+        for run in data.get('runs', []):
+            for rule in run.get('tool', {}).get('driver', {}).get('rules', []):
+                if 'relationships' in rule:
+                    # Filter out invalid relationship entries
+                    valid_relationships = []
+                    for rel in rule['relationships']:
+                        if isinstance(rel, dict) and 'target' in rel:
+                            valid_relationships.append(rel)
+                    rule['relationships'] = valid_relationships if valid_relationships else None
+                    # Remove if empty
+                    if rule['relationships'] is None or len(rule['relationships']) == 0:
+                        del rule['relationships']
+        
+        with open('gosec-results.sarif', 'w') as f:
+            json.dump(data, f, indent=2)
+        EOF
+
     - name: Upload SARIF file
       uses: github/codeql-action/upload-sarif@v4
       if: always()
