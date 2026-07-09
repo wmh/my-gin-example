@@ -6,7 +6,7 @@ orbs:
 jobs:
   build-and-test:
     docker:
-      - image: cimg/go:1.23
+      - image: cimg/go:1.26
     steps:
       - checkout
       
@@ -37,7 +37,7 @@ jobs:
 
   lint:
     docker:
-      - image: cimg/go:1.23
+      - image: cimg/go:1.26
     steps:
       - checkout
       
@@ -52,7 +52,7 @@ jobs:
 
   security-scan:
     docker:
-      - image: cimg/go:1.23
+      - image: cimg/go:1.26
     steps:
       - checkout
       

@@ -24,7 +24,7 @@ jobs:
       uses: actions/setup-go@v5
       with:
         # Track the latest 1.25 patch so govulncheck doesn't fail on known stdlib CVEs.
-        go-version: '1.25.x'
+        go-version: '1.26.x'
         check-latest: true
 
     - name: Run Gosec Security Scanner
@@ -75,7 +75,7 @@ jobs:
       uses: actions/setup-go@v5
       with:
         # Keep scanner runtime on the latest Go patch to avoid stdlib vulnerability findings.
-        go-version: '1.25.x'
+        go-version: '1.26.x'
         check-latest: true
 
     - name: Install govulncheck
