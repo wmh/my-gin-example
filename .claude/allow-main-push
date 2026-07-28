@@ -1,0 +1,2 @@
+# 這個 repo 採用直接推 master 的政策（私有 repo、單人維護）。
+# 讀取者：~/.claude/hooks/guard-main-push.py、~/.claude/commands/ship.md、~/.claude/CLAUDE.md
